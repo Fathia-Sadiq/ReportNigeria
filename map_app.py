@@ -10,27 +10,38 @@ st.title("ReportNigeria")
 st.write("This Web app displays all reported terrorist attacks happening all over the country")
 st.write("\nReport an Incident:\n")
 
-incident = st.text_input("Enter location in this format (LGA, State): Ex: (Ifedore, Ondo State)")
-def validate_data(inp: str) -> None:
-    pattern = r"[a-zA ]+[,]+ [a-zA ]"
-    if re.match(pattern, inp) == None:
-        st.error("Invalid input: should be (LGA, State)")
-
-st.button(
-    "Validate data",
-    type="primary",
-    icon=":material/refresh:",
-    on_click=validate_data,
-    kwargs={"inp": incident},
-)   
-
-details = st.text_input("Please enter details of attack: Type of attack, number of deaths, etc")
-srcs = st.text_input("Please add additional sources")
 #file type must be .shp
 file = gpd.read_file('nga_admin_boundaries.shp/nga_admin2.shp')
+#Extracting LGA (adm2_name)
+lga = file['adm2_name'].unique()
+lga_option = st.selectbox(
+   "Select LGA:",
+   lga,
+   index=None,
+   placeholder="Enter the affected LGA",
+)
+# Displaying the selected option
+st.write("You selected:", lga_option)
+#Extracting State (adm1_name)
+state = file['adm1_name'].unique()
+state_option = st.selectbox(
+   "Select State:",
+   state,
+   index=None,
+   placeholder="Enter the affected State",
+)
+# Displaying the selected option
+st.write("You selected:", state_option)
 
+#filter and confirm that LGA belongs to the selected State
+confirm_inp = file[(file['adm2_name'] == lga_option) & (file['adm1_name'] == state_option)]
+if confirm_inp.empty:
+    st.error("The selected LGA does not belong to the selected State.")
+else:
+    details = st.text_input("Please enter details of attack: Type of attack, number of deaths, etc")
+    srcs = st.text_input("Please add additional sources")
 
-m = file.explore('adm1_name',tooltip=False, popup=['adm2_name','adm1_name', 'area_sqkm','adm2_ref_n','sendist_en','center_lat','center_lon'])
+m = file.explore('adm1_name',tooltip=False, popup=['adm2_name','adm1_name', 'area_sqkm','sendist_en','center_lat','center_lon'])
 st_data = st_folium(m, use_container_width=True)
 #st.write(st_data)
 data = st_data["last_active_drawing"]
