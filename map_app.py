@@ -4,7 +4,7 @@ import folium
 from streamlit_folium import st_folium
 import mapclassify
 from matplotlib import pyplot as plt
-import re
+import sqlite3
 
 st.title("ReportNigeria")
 st.write("This Web app displays all reported terrorist attacks happening all over the country")
@@ -58,3 +58,23 @@ except:
     st.write("")
 st_data = st_folium(m, use_container_width=True)
 
+#testing dbs
+try:
+    conn = sqlite3.connect('report_nigeria.db')
+    c = conn.cursor()
+    print("Database created successfully")
+
+    #Create a table query
+    table_creation_query = """
+        CREATE TABLE 
+                            """
+    c.execute(table_creation_query)
+    c.close()   #close cursor after use
+
+except  sqlite3.Error as error:
+    print("Error occured -", error)
+
+finally:
+    if conn:
+        conn.close()
+        print("SQLite Connection closed")
