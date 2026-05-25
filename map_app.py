@@ -39,7 +39,9 @@ if confirm_inp.empty:
     st.error("The selected LGA does not belong to the selected State.")
 else:
     details = st.text_input("Please enter details of attack: Type of attack, number of deaths, etc")
-    srcs = st.text_input("Please add additional sources")
+    uploaded_files = st.file_uploader("Please add additional sources (Valid file types: pdf, docx, jpg, png)",
+                                       accept_multiple_files=True, 
+                                       type=['pdf', 'docx', 'jpg', 'png'])
 
 #extract the coordinates of the selected LGA and display on map
 try:
