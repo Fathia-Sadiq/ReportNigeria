@@ -66,15 +66,25 @@ try:
 
     #Create a table query
     table_creation_query = """
-        CREATE TABLE 
+        CREATE TABLE IF NOT EXISTS REPORTDATA (
+                Lga CHAR(25) NOT NULL,
+                State CHAR(25)  NOT NULL,
+                Details VARCHAR (255) NOT NULL,
+                Media VARCHAR (255)   NOT NULL,
+                Lat FLOAT,
+                Lon FLOAT);
                             """
     c.execute(table_creation_query)
+    conn.commit()
+    #st.write("Table is Ready")
     c.close()   #close cursor after use
 
 except  sqlite3.Error as error:
-    print("Error occured -", error)
+   st.write("Error occured -", error)
 
 finally:
     if conn:
         conn.close()
-        print("SQLite Connection closed")
+        st.success("SQLite Connection closed")
+
+
