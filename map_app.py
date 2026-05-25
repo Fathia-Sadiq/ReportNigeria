@@ -17,7 +17,7 @@ lga = file['adm2_name'].unique()
 lga_option = st.selectbox(
    "Select LGA:",
    lga,
-   index=None,
+   index=0,
    placeholder="Enter the affected LGA",
 )
 # Displaying the selected option
@@ -27,7 +27,7 @@ state = file['adm1_name'].unique()
 state_option = st.selectbox(
    "Select State:",
    state,
-   index=None,
+   index=0,
    placeholder="Enter the affected State",
 )
 # Displaying the selected option
@@ -41,13 +41,18 @@ else:
     details = st.text_input("Please enter details of attack: Type of attack, number of deaths, etc")
     srcs = st.text_input("Please add additional sources")
 
+#extract the coordinates of the selected LGA and display on map
+try:
+    lon = confirm_inp['center_lon'].values[0]
+    lat = confirm_inp['center_lat'].values[0]
+except IndexError:
+    st.error("Coordinates not found for the selected LGA.")
+#st.write("Coordinates of the selected LGA:", lat, lon)
 m = file.explore('adm1_name',tooltip=False, popup=['adm2_name','adm1_name', 'area_sqkm','sendist_en','center_lat','center_lon'])
+#add a marker to the map
+try:
+    folium.Marker([lat, lon], icon=folium.Icon(color='red')).add_to(m)
+except:
+    st.write("")
 st_data = st_folium(m, use_container_width=True)
-#st.write(st_data)
-data = st_data["last_active_drawing"]
-if data != None:
-    ppties = data["properties"]
-    lat = ppties["center_lat"]
-    lon = ppties["center_lon"]
-    st.write(lat, lon)
-#st.write(data)
+
