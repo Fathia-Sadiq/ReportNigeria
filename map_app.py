@@ -5,6 +5,7 @@ from streamlit_folium import st_folium
 import mapclassify
 from matplotlib import pyplot as plt
 import sqlite3
+import json
 
 st.title("ReportNigeria")
 st.write("This Web app displays all reported terrorist attacks happening all over the country")
@@ -37,11 +38,12 @@ st.write("You selected:", state_option)
 confirm_inp = file[(file['adm2_name'] == lga_option) & (file['adm1_name'] == state_option)]
 if confirm_inp.empty:
     st.error("The selected LGA does not belong to the selected State.")
-else:
-    details = st.text_input("Please enter details of attack: Type of attack, number of deaths, etc")
-    uploaded_files = st.file_uploader("Please add additional sources (Valid file types: pdf, docx, jpg, png)",
+details = st.text_input("Please enter details of attack: Type of attack, number of deaths, etc")
+uploaded_files = st.file_uploader("Please add additional sources (Valid file types: pdf, docx, jpg, png)",
                                        accept_multiple_files=True, 
                                        type=['pdf', 'docx', 'jpg', 'png'])
+    
+    #uploaded_files_json = json.dumps(uploaded_files)
 
 #extract the coordinates of the selected LGA and display on map
 try:
@@ -65,22 +67,30 @@ try:
     print("Database created successfully")
 
     #Create a table query
-    table_creation_query = """
-        CREATE TABLE IF NOT EXISTS REPORTDATA (
+    table_creation_query = """CREATE TABLE IF NOT EXISTS REPORTDATA (
                 Lga CHAR(25) NOT NULL,
                 State CHAR(25)  NOT NULL,
                 Details VARCHAR (255) NOT NULL,
-                Media VARCHAR (255)   NOT NULL,
-                Lat FLOAT,
-                Lon FLOAT);
+                Lat DECIMAL(10,2),
+                Lon DECIMAL(10,2)
+                );
                             """
+    insert_query = """INSERT INTO REPORTDATA
+                    (Lga, State, Details, Lat, Lon)
+                    VALUES
+                    (?,?,?,?,?)
+                    """
     c.execute(table_creation_query)
+    c.execute(insert_query, (lga_option, state_option, details, lat, lon))
     conn.commit()
     #st.write("Table is Ready")
     c.close()   #close cursor after use
 
-except  sqlite3.Error as error:
+except sqlite3.Error as error:
    st.write("Error occured -", error)
+
+except NameError:
+    st.error("Lat and lon does not exist for this location")
 
 finally:
     if conn:
